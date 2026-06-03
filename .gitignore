@@ -1,6 +1,3 @@
-# MD
-*.md
-
 # Dependencies
 node_modules/
 /.pnp
@@ -62,6 +59,3 @@ Thumbs.db
 *.launch
 .settings/
 *.sublime-workspace
-
-# AI TOOLS
-.cloude/
