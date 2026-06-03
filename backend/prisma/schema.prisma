@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum UserRole {
+  CLIENT
+  ADMIN
+}
+
+enum JournalStatus {
+  PUBLISHED
+  DELETED
+}
+
+// Users
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(CLIENT)
+  firstName    String?  @map("first_name")
+  lastName     String?  @map("last_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  workLogs WorkLogEntry[]
+
+  @@index([role])
+  @@map("users")
+}
+
+// Work Type
+model WorkType {
+  id   String @id @default(cuid())
+  name String
+
+  workLogs WorkLogEntry[]
+
+  @@map("work_types")
+}
+
+// Work Unit
+model WorkUnit {
+  id   String @id @default(cuid())
+  name String
+
+  workLogs WorkLogEntry[]
+
+  @@map("work_units")
+}
+
+// Work log item
+model WorkLogEntry {
+  id        String        @id @default(cuid())
+  userId    String        @map("user_id")
+  typeId    String        @map("type_id")
+  unitId    String        @map("unit_id")
+  amount    Decimal       @db.Decimal(12, 3)
+  status    JournalStatus @default(PUBLISHED)
+  comment   String?       @db.Text
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  workType WorkType @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  unitType WorkUnit @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([typeId])
+  @@index([unitId])
+  @@index([status])
+  @@map("work_log")
+}
